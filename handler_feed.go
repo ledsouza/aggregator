@@ -109,7 +109,6 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 }
 
 func handlerFollowing(s *state, cmd command, user database.User) error {
-
 	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return fmt.Errorf("couldn't get feeds: %w", err)
@@ -118,6 +117,23 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	fmt.Println("The feeds that you are following are:")
 	for _, feed := range feeds {
 		fmt.Printf("%s\n", feed.FeedName)
+	}
+
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("url is required")
+	}
+	url := cmd.Args[0]
+
+	err := s.db.DeleteFeedFollowByUrl(context.Background(), database.DeleteFeedFollowByUrlParams{
+		Url:    url,
+		UserID: user.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("couldn't delete feed follow: %w", err)
 	}
 
 	return nil
